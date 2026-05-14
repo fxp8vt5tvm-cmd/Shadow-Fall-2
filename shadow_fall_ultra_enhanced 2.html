@@ -1,0 +1,1388 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shadow Fall Ultra Enhanced</title>
+
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+overflow:hidden;
+background:radial-gradient(circle at top,#0f172a,#020617);
+color:white;
+}
+
+/* MENU */
+
+#menu{
+position:absolute;
+inset:0;
+display:flex;
+flex-direction:column;
+align-items:center;
+overflow:auto;
+padding:20px;
+background:
+radial-gradient(circle at top,#1e3a8a 0%,#050816 70%);
+}
+
+#menu::before{
+content:"";
+position:absolute;
+width:200%;
+height:200%;
+background:
+radial-gradient(circle,rgba(0,255,255,.12),transparent 60%);
+animation:bgmove 18s linear infinite;
+pointer-events:none;
+}
+
+@keyframes bgmove{
+0%{transform:translate(-20%,-20%);}
+50%{transform:translate(10%,5%);}
+100%{transform:translate(-20%,-20%);}
+}
+
+.logo{
+font-size:95px;
+font-weight:bold;
+margin-top:20px;
+color:#7dd3fc;
+text-shadow:
+0 0 10px #38bdf8,
+0 0 40px #0ea5e9,
+0 0 80px #0284c7;
+animation:logoPulse 3s infinite;
+z-index:2;
+}
+
+@keyframes logoPulse{
+0%{transform:scale(1);}
+50%{transform:scale(1.04);}
+100%{transform:scale(1);}
+}
+
+.subtitle{
+font-size:22px;
+margin-bottom:20px;
+opacity:.9;
+z-index:2;
+}
+
+.panel{
+width:min(95%,1150px);
+background:
+linear-gradient(
+180deg,
+rgba(15,23,42,.95),
+rgba(2,6,23,.92)
+);
+border:2px solid #38bdf8;
+border-radius:24px;
+padding:24px;
+margin:14px;
+backdrop-filter:blur(8px);
+box-shadow:
+0 0 25px rgba(0,255,255,.16),
+inset 0 0 20px rgba(0,255,255,.05);
+z-index:2;
+}
+
+h2{
+color:#7dd3fc;
+text-shadow:
+0 0 10px rgba(0,255,255,.45);
+}
+
+button{
+padding:14px 24px;
+margin:8px;
+border:none;
+border-radius:14px;
+background:
+linear-gradient(90deg,#2563eb,#0ea5e9);
+color:white;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+transition:.2s;
+box-shadow:
+0 0 20px rgba(0,150,255,.35);
+position:relative;
+overflow:hidden;
+}
+
+button::before{
+content:"";
+position:absolute;
+top:0;
+left:-120%;
+width:100%;
+height:100%;
+background:
+linear-gradient(
+90deg,
+transparent,
+rgba(255,255,255,.35),
+transparent
+);
+transition:.6s;
+}
+
+button:hover::before{
+left:120%;
+}
+
+button:hover{
+transform:scale(1.06);
+box-shadow:
+0 0 30px rgba(0,255,255,.5);
+}
+
+.grid{
+display:grid;
+grid-template-columns:
+repeat(auto-fit,minmax(230px,1fr));
+gap:18px;
+}
+
+.card{
+background:
+linear-gradient(180deg,#0f172a,#111827);
+padding:18px;
+border-radius:18px;
+border:1px solid #38bdf8;
+transition:.2s;
+}
+
+.card:hover{
+transform:translateY(-5px);
+box-shadow:
+0 0 20px rgba(0,255,255,.3);
+}
+
+.hero{
+width:220px;
+height:220px;
+border-radius:50%;
+background:
+radial-gradient(circle,#00ffff,#2563eb);
+display:flex;
+justify-content:center;
+align-items:center;
+margin:auto;
+font-size:32px;
+font-weight:bold;
+box-shadow:
+0 0 30px #00ffff,
+0 0 80px #2563eb;
+animation:heroFloat 3s ease-in-out infinite;
+}
+
+@keyframes heroFloat{
+0%{transform:translateY(0px);}
+50%{transform:translateY(-10px);}
+100%{transform:translateY(0px);}
+}
+
+#hud{
+position:absolute;
+top:15px;
+left:15px;
+background:
+rgba(0,0,0,.35);
+padding:16px;
+border-radius:18px;
+display:none;
+z-index:20;
+min-width:240px;
+backdrop-filter:blur(10px);
+}
+
+#minimap{
+position:absolute;
+top:20px;
+right:20px;
+width:190px;
+height:190px;
+background:
+rgba(0,0,0,.35);
+border:
+2px solid #38bdf8;
+border-radius:18px;
+display:none;
+z-index:20;
+}
+
+#controls{
+position:absolute;
+bottom:20px;
+right:20px;
+display:none;
+gap:12px;
+z-index:30;
+}
+
+.control{
+width:90px;
+height:90px;
+border-radius:50%;
+background:
+rgba(0,0,0,.45);
+border:
+2px solid #38bdf8;
+display:flex;
+justify-content:center;
+align-items:center;
+font-weight:bold;
+box-shadow:
+0 0 18px rgba(0,255,255,.25);
+user-select:none;
+touch-action:none;
+}
+
+#countdown{
+position:absolute;
+top:40%;
+left:50%;
+transform:translate(-50%,-50%);
+font-size:100px;
+font-weight:bold;
+display:none;
+z-index:100;
+text-shadow:
+0 0 20px white;
+}
+
+#killfeed{
+position:absolute;
+top:230px;
+right:20px;
+width:280px;
+background:
+rgba(0,0,0,.35);
+padding:14px;
+border-radius:18px;
+display:none;
+z-index:20;
+max-height:300px;
+overflow:auto;
+}
+
+.kill{
+margin-bottom:8px;
+font-size:14px;
+}
+
+#xpbar{
+width:100%;
+height:18px;
+background:#111827;
+border-radius:10px;
+overflow:hidden;
+margin-top:10px;
+}
+
+#xpfill{
+width:25%;
+height:100%;
+background:
+linear-gradient(90deg,#00ffff,#2563eb);
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="menu">
+
+<div class="logo">SF 🔥</div>
+
+<div class="subtitle">
+SHADOW FALL — Season 1: Rise of the Storm
+</div>
+
+<div class="panel">
+
+<h2>⚔️ PLAY</h2>
+
+<p>
+Fast-paced hero battle royale with abilities,
+rarity weapons, progression, and colorful maps.
+</p>
+
+<button onclick="startGame()">PLAY NOW</button>
+<button>SHOP</button>
+<button>BATTLE PASS</button>
+<button>FRIENDS</button>
+<button>SETTINGS</button>
+
+<div class="hero">RONIN</div>
+
+</div>
+
+</div>
+
+<div id="hud">
+<div id="health">❤️ Health: 100</div>
+<div id="shield">🛡️ Shield: 50</div>
+<div id="weapon">🔫 Rustbite SMG</div>
+<div id="kills">⚔️ Eliminations: 0</div>
+<div id="ability">⚡ Ability Ready</div>
+<div id="coins">🪙 Coins: 0</div>
+</div>
+
+<div id="minimap"></div>
+
+<div id="controls">
+
+<div class="control">RUN</div>
+
+<div class="control"
+onclick="activateAbility()">
+ABILITY
+</div>
+
+<div
+class="control"
+id="shootBtn">
+SHOOT
+</div>
+
+</div>
+
+<div id="countdown">3</div>
+
+<div id="killfeed">
+<div class="kill">
+NeonRonin eliminated ArcticGhost
+</div>
+</div>
+
+<script>
+
+const weapons = [
+
+{
+name:"Rustbite SMG",
+rarity:"Common",
+damage:10,
+speed:900,
+color:0xffffff
+},
+
+{
+name:"Frostfang Rifle",
+rarity:"Rare",
+damage:20,
+speed:1100,
+color:0x00ffff
+},
+
+{
+name:"Solar Reaper",
+rarity:"Legendary",
+damage:35,
+speed:1300,
+color:0xffaa00
+},
+
+{
+name:"DragonPulse Blaster",
+rarity:"Mythical",
+damage:50,
+speed:1600,
+color:0xff00ff
+}
+
+];
+
+const maps = [
+"Neon Heights",
+"Crystal Canyon",
+"Ember Rift",
+"Frostbite Station"
+];
+
+const weatherStates = [
+"Clear",
+"Rain",
+"Storm",
+"Fog"
+];
+
+let gameStarted = false;
+
+let player;
+let enemies;
+let bullets;
+let lootGroup;
+
+let health = 100;
+let shield = 50;
+let kills = 0;
+let coins = 0;
+
+let currentWeapon = weapons[0];
+
+let abilityCooldown = false;
+
+let playerGlow;
+let cursors;
+let dashKey;
+
+let mobileAim = {
+active:false,
+startX:0,
+startY:0,
+targetX:0,
+targetY:0
+};
+
+function startGame(){
+
+if(gameStarted) return;
+
+gameStarted = true;
+
+document.getElementById("menu")
+.style.display = "none";
+
+document.getElementById("hud")
+.style.display = "block";
+
+document.getElementById("controls")
+.style.display = "flex";
+
+document.getElementById("killfeed")
+.style.display = "block";
+
+document.getElementById("minimap")
+.style.display = "block";
+
+startCountdown();
+
+setTimeout(() => {
+
+launchGame();
+setupMobileAim();
+
+},4000);
+
+}
+
+function startCountdown(){
+
+const countdown =
+document.getElementById("countdown");
+
+countdown.style.display = "block";
+
+const numbers =
+["3","2","1","FIGHT!"];
+
+let i = 0;
+
+const interval = setInterval(() => {
+
+countdown.innerText =
+numbers[i];
+
+i++;
+
+if(i >= numbers.length){
+
+clearInterval(interval);
+
+setTimeout(() => {
+
+countdown.style.display = "none";
+
+},800);
+
+}
+
+},900);
+
+}
+
+function launchGame(){
+
+const config = {
+
+type:Phaser.AUTO,
+
+width:window.innerWidth,
+height:window.innerHeight,
+
+physics:{
+default:'arcade',
+arcade:{
+debug:false
+}
+},
+
+scene:{
+preload:preload,
+create:create,
+update:update
+}
+
+};
+
+new Phaser.Game(config);
+
+}
+
+function preload(){}
+
+function create(){
+
+window.gameScene = this;
+
+this.cameras.main.setBackgroundColor('#050816');
+
+this.physics.world.setBounds(0,0,2400,2400);
+
+this.add.rectangle(
+1200,
+1200,
+3000,
+3000,
+0x07111f
+);
+
+for(let i=0;i<300;i++){
+
+let star = this.add.circle(
+Phaser.Math.Between(0,2400),
+Phaser.Math.Between(0,2400),
+Phaser.Math.Between(1,3),
+0xffffff,
+Math.random()
+);
+
+this.tweens.add({
+targets:star,
+alpha:.2,
+duration:1000 + Math.random()*2000,
+yoyo:true,
+repeat:-1
+});
+
+}
+
+for(let x=0;x<2400;x+=120){
+
+this.add.rectangle(
+x,
+1200,
+2,
+2400,
+0x0ea5e9,
+0.12
+);
+
+}
+
+for(let y=0;y<2400;y+=120){
+
+this.add.rectangle(
+1200,
+y,
+2400,
+2,
+0x0ea5e9,
+0.12
+);
+
+}
+
+for(let i=0;i<100;i++){
+
+let rock = this.add.circle(
+Phaser.Math.Between(0,2400),
+Phaser.Math.Between(0,2400),
+Phaser.Math.Between(18,55),
+0x111827
+);
+
+rock.setStrokeStyle(2,0x00ffff,.25);
+
+}
+
+const mapName =
+maps[
+Math.floor(
+Math.random() *
+maps.length
+)
+];
+
+this.add.text(
+40,
+40,
+"MAP: " + mapName,
+{
+fontSize:"28px",
+color:"#00ffff"
+}
+).setScrollFactor(0);
+
+const weather =
+weatherStates[
+Math.floor(
+Math.random() *
+weatherStates.length
+)
+];
+
+this.add.text(
+40,
+80,
+"WEATHER: " + weather,
+{
+fontSize:"20px",
+color:"#ffffff"
+}
+).setScrollFactor(0);
+
+player = this.add.circle(
+600,
+500,
+28,
+0x00ffff
+);
+
+player.setStrokeStyle(5,0xffffff);
+
+playerGlow = this.add.circle(
+600,
+500,
+65,
+0x00ffff,
+0.12
+);
+
+this.physics.add.existing(player);
+
+player.body.setCollideWorldBounds(true);
+
+this.cameras.main.startFollow(
+player,
+true,
+0.08,
+0.08
+);
+
+this.cameras.main.setZoom(1.12);
+
+enemies = this.physics.add.group();
+
+for(let i=0;i<14;i++){
+
+let enemy = this.add.rectangle(
+Phaser.Math.Between(100,2200),
+Phaser.Math.Between(100,2200),
+42,
+42,
+0xff3366
+);
+
+enemy.setStrokeStyle(4,0xffffff);
+
+enemy.health = 100;
+
+enemy.glow = this.add.circle(
+enemy.x,
+enemy.y,
+55,
+0xff0044,
+0.15
+);
+
+this.physics.add.existing(enemy);
+
+enemies.add(enemy);
+
+}
+
+bullets = this.physics.add.group();
+
+lootGroup = this.physics.add.group();
+
+cursors =
+this.input.keyboard.createCursorKeys();
+
+dashKey =
+this.input.keyboard.addKey(
+Phaser.Input.Keyboard.KeyCodes.SHIFT
+);
+
+this.input.on('pointerdown',(pointer)=>{
+
+shoot(pointer,this);
+
+});
+
+this.physics.add.overlap(
+
+bullets,
+enemies,
+
+(bullet,enemy)=>{
+
+enemy.health -= currentWeapon.damage;
+
+bullet.destroy();
+
+enemy.fillColor = 0xffffff;
+
+setTimeout(()=>{
+enemy.fillColor = 0xff3366;
+},70);
+
+damageNumber(
+this,
+enemy.x,
+enemy.y,
+currentWeapon.damage
+);
+
+for(let i=0;i<8;i++){
+
+let particle =
+this.add.circle(
+enemy.x,
+enemy.y,
+Phaser.Math.Between(2,5),
+0xff3366
+);
+
+this.tweens.add({
+
+targets:particle,
+
+x:
+particle.x +
+Phaser.Math.Between(-40,40),
+
+y:
+particle.y +
+Phaser.Math.Between(-40,40),
+
+alpha:0,
+
+duration:450,
+
+onComplete:()=>{
+particle.destroy();
+}
+
+});
+
+}
+
+screenShake(this);
+
+if(enemy.health <= 0){
+
+enemy.glow.destroy();
+enemy.destroy();
+
+kills++;
+coins += 50;
+
+spawnLoot(this);
+
+randomWeapon();
+
+updateHUD();
+
+addKillFeed();
+
+eliminationFlash();
+
+if(
+enemies.countActive(true)
+<= 0
+){
+
+victory();
+
+}
+
+}
+
+}
+
+);
+
+this.physics.add.overlap(
+
+player,
+lootGroup,
+
+(player,loot)=>{
+
+loot.destroy();
+
+coins += 20;
+
+updateHUD();
+
+}
+
+);
+
+}
+
+function shoot(pointer,scene){
+
+let flash = scene.add.circle(
+player.x,
+player.y,
+30,
+0xffffff,
+0.8
+);
+
+scene.tweens.add({
+
+targets:flash,
+
+alpha:0,
+scale:2,
+
+duration:120,
+
+onComplete:()=>{
+
+flash.destroy();
+
+}
+
+});
+
+let bullet = scene.add.circle(
+
+player.x,
+player.y,
+
+7,
+
+currentWeapon.color
+
+);
+
+bullet.glow =
+scene.add.circle(
+
+player.x,
+player.y,
+
+18,
+
+currentWeapon.color,
+0.3
+
+);
+
+scene.physics.add.existing(bullet);
+
+bullets.add(bullet);
+
+scene.physics.moveTo(
+
+bullet,
+pointer.worldX,
+pointer.worldY,
+currentWeapon.speed
+
+);
+
+scene.time.addEvent({
+
+delay:35,
+
+repeat:20,
+
+callback:()=>{
+
+if(!bullet.active)
+return;
+
+let trail = scene.add.circle(
+bullet.x,
+bullet.y,
+3,
+currentWeapon.color,
+0.25
+);
+
+scene.tweens.add({
+
+targets:trail,
+
+alpha:0,
+scale:0,
+
+duration:300,
+
+onComplete:()=>{
+
+trail.destroy();
+
+}
+
+});
+
+}
+
+});
+
+setTimeout(()=>{
+
+if(bullet.glow)
+bullet.glow.destroy();
+
+if(bullet)
+bullet.destroy();
+
+},1800);
+
+}
+
+function damageNumber(
+scene,
+x,
+y,
+amount
+){
+
+const txt =
+scene.add.text(
+
+x,
+y,
+
+"-" + amount,
+
+{
+fontSize:"18px",
+color:"#ff4444"
+}
+
+);
+
+scene.tweens.add({
+
+targets:txt,
+
+y:y-40,
+
+alpha:0,
+
+duration:800,
+
+onComplete:()=>{
+
+txt.destroy();
+
+}
+
+});
+
+}
+
+function randomWeapon(){
+
+currentWeapon =
+weapons[
+Math.floor(
+Math.random() *
+weapons.length
+)
+];
+
+}
+
+function updateHUD(){
+
+document.getElementById("health")
+.innerText =
+"❤️ Health: " +
+Math.floor(health);
+
+document.getElementById("shield")
+.innerText =
+"🛡️ Shield: " +
+Math.floor(shield);
+
+document.getElementById("kills")
+.innerText =
+"⚔️ Eliminations: " +
+kills;
+
+document.getElementById("weapon")
+.innerText =
+"🔫 " +
+currentWeapon.name;
+
+document.getElementById("coins")
+.innerText =
+"🪙 Coins: " +
+coins;
+
+}
+
+function addKillFeed(){
+
+const feed =
+document.getElementById(
+"killfeed"
+);
+
+const div =
+document.createElement("div");
+
+div.className = "kill";
+
+div.innerText =
+"YOU eliminated enemy";
+
+feed.prepend(div);
+
+}
+
+function spawnLoot(scene){
+
+let loot =
+scene.add.circle(
+
+Phaser.Math.Between(100,1200),
+Phaser.Math.Between(100,700),
+
+12,
+
+0x00ff00
+
+);
+
+scene.physics.add.existing(loot);
+
+lootGroup.add(loot);
+
+scene.tweens.add({
+
+targets:loot,
+
+scale:1.4,
+
+duration:700,
+
+yoyo:true,
+
+repeat:-1
+
+});
+
+}
+
+function screenShake(scene){
+
+scene.cameras.main.shake(
+100,
+0.004
+);
+
+}
+
+function eliminationFlash(){
+
+document.body.style.background =
+"#220000";
+
+setTimeout(()=>{
+
+document.body.style.background =
+"#050816";
+
+},100);
+
+}
+
+function activateAbility(){
+
+if(abilityCooldown)
+return;
+
+abilityCooldown = true;
+
+document.getElementById(
+"ability"
+).innerText =
+"⚡ Cooldown";
+
+health += 20;
+
+if(health > 100)
+health = 100;
+
+updateHUD();
+
+setTimeout(()=>{
+
+abilityCooldown = false;
+
+document.getElementById(
+"ability"
+).innerText =
+"⚡ Ability Ready";
+
+},5000);
+
+}
+
+function victory(){
+
+alert(
+"🏆 VICTORY ROYALE!"
+);
+
+location.reload();
+
+}
+
+function setupMobileAim(){
+
+const shootBtn =
+document.getElementById("shootBtn");
+
+shootBtn.addEventListener(
+"touchstart",
+e=>{
+
+const touch =
+e.touches[0];
+
+mobileAim.active = true;
+
+mobileAim.startX = touch.clientX;
+mobileAim.startY = touch.clientY;
+
+}
+);
+
+shootBtn.addEventListener(
+"touchmove",
+e=>{
+
+if(!mobileAim.active)
+return;
+
+const touch =
+e.touches[0];
+
+mobileAim.targetX =
+touch.clientX;
+
+mobileAim.targetY =
+touch.clientY;
+
+}
+);
+
+shootBtn.addEventListener(
+"touchend",
+()=>{
+
+if(!mobileAim.active)
+return;
+
+mobileAim.active = false;
+
+shootMobileDirection();
+
+}
+);
+
+}
+
+function shootMobileDirection(){
+
+if(!window.gameScene)
+return;
+
+const dx =
+mobileAim.targetX -
+mobileAim.startX;
+
+const dy =
+mobileAim.targetY -
+mobileAim.startY;
+
+const angle =
+Math.atan2(dy,dx);
+
+const distance = 800;
+
+const targetX =
+player.x +
+Math.cos(angle) * distance;
+
+const targetY =
+player.y +
+Math.sin(angle) * distance;
+
+shoot({
+
+worldX:targetX,
+worldY:targetY
+
+},window.gameScene);
+
+}
+
+function update(){
+
+if(!player)
+return;
+
+player.body.setVelocity(0);
+
+const speed = 320;
+
+if(cursors.left.isDown){
+
+player.body.setVelocityX(-speed);
+
+}
+
+if(cursors.right.isDown){
+
+player.body.setVelocityX(speed);
+
+}
+
+if(cursors.up.isDown){
+
+player.body.setVelocityY(-speed);
+
+}
+
+if(cursors.down.isDown){
+
+player.body.setVelocityY(speed);
+
+}
+
+if(
+dashKey.isDown &&
+!player.dashing
+){
+
+player.dashing = true;
+
+player.body.velocity.scale(2.8);
+
+this.tweens.add({
+
+targets:player,
+
+scale:1.4,
+
+duration:120,
+
+yoyo:true
+
+});
+
+setTimeout(()=>{
+
+player.dashing = false;
+
+},800);
+
+}
+
+playerGlow.x = player.x;
+playerGlow.y = player.y;
+
+enemies.getChildren()
+.forEach(enemy=>{
+
+enemy.glow.x = enemy.x;
+enemy.glow.y = enemy.y;
+
+this.physics.moveToObject(
+enemy,
+player,
+95
+);
+
+const dist =
+Phaser.Math.Distance.Between(
+
+player.x,
+player.y,
+
+enemy.x,
+enemy.y
+
+);
+
+if(dist < 50){
+
+if(shield > 0){
+
+shield -= 0.25;
+
+}else{
+
+health -= 0.25;
+
+}
+
+document.body.style.filter =
+"brightness(1.2)";
+
+setTimeout(()=>{
+
+document.body.style.filter =
+"brightness(1)";
+
+},50);
+
+updateHUD();
+
+}
+
+if(health <= 0){
+
+alert("☠️ Eliminated");
+
+location.reload();
+
+}
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
